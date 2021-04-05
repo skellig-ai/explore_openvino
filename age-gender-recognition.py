@@ -16,7 +16,7 @@ def post_process(infer):
 	return age, gender
 
 ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--image", default="/home/skellig/Pictures/not_a_person.jpeg", type=str,
+ap.add_argument("-i", "--image", default="images/not_a_person_0.jpeg", type=str,
 	help="path to input image for inference")
 ap.add_argument("-p", "--processor", default='CPU', type=str,
 	help="processor to use")
