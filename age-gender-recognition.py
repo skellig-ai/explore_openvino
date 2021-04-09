@@ -3,8 +3,13 @@ import cv2
 import math
 import time
 import argparse
+from pathlib import Path
 from openvino.inference_engine import IECore, IENetwork
 
+path = Path.cwd()
+parent_path = path.parent
+image_path = path/'images'
+model_path = parent_path/'openvino_models'
 
 def post_process(infer):
 	age = math.floor(100*infer["age_conv3"][0][0][0][0])
@@ -16,19 +21,18 @@ def post_process(infer):
 	return age, gender
 
 ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--image", default="images/not_a_person_0.jpeg", type=str,
+ap.add_argument("-i", "--image", default=image_path/"not_a_person_0.jpeg", type=str,
 	help="path to input image for inference")
 ap.add_argument("-p", "--processor", default='CPU', type=str,
 	help="processor to use")
 args = vars(ap.parse_args())
 
-
-model = "/home/skellig/Documents/models/intel/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.xml"
-weights = "/home/skellig/Documents/models/intel/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.bin"
+model = model_path/'intel/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.xml'
+weights = model_path/'intel/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.bin'
 
 processor = args['processor']
 img_path = args['image']
-org_image = cv2.imread(img_path)
+org_image = cv2.imread(str(img_path))
 
 ie = IECore()
 
