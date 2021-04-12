@@ -5,6 +5,7 @@ import time
 import argparse
 import numpy as np
 from pathlib import Path
+import matplotlib.pyplot as plt
 from openvino.inference_engine import IECore, IENetwork
 
 def post_process(infer):
@@ -12,7 +13,7 @@ def post_process(infer):
 	infer_res = np.round(infer['206'].reshape(h,w,c,n))
 	for idx in range(0,c):
 		infer_res[:,:,idx,:] = idx*infer_res[:,:,idx,:]
-	return np.sum(infer_res, axis=2)
+	return infer_res
 
 path = Path.cwd()
 parent_path = path.parent
@@ -44,20 +45,28 @@ input_layer= net.input_info['input.1'].input_data
 
 n,c,h,w = input_layer.shape
 
-image = cv2.resize(org_image, (w,h))
-image = image.reshape((n,c,h,w))
+org_image = cv2.resize(org_image, (w,h))
+image = org_image.reshape((n,c,h,w))
 
 
 exec_net = ie.load_network(network=net, device_name = device)
 
 infer = exec_net.infer({'input.1': image})
-infer_res = post_process(infer)
-print(np.max(infer_res))
-sys.exit(0)
+post_processed_image = np.argmax(infer['206'],axis=1).reshape((h,w,n))
+print(infer['206'].shape)
+print(post_processed_image.shape)
+#sys.exit(0)
+#infer_res = post_process(infer)
+#print(np.unravel_index(np.max(infer_res,axis=2),infer_res.shape))
+#sys.exit(0)
 
-cv2.imshow('fig_1', infer_res)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+#plt.figure()
+plt.imshow(org_image, cmap='gray') # I would add interpolation='none'
+plt.imshow(post_processed_image, cmap='jet', alpha=0.5) # interpolation='none'
+plt.show()
+#cv2.imshow('fig_1', post_processed_image)
+#cv2.waitKey(0)
+#cv2.destroyAllWindows()
 
 #print()
 
